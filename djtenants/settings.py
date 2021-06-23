@@ -29,17 +29,35 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
+SHARED_APPS = (
+    'django_tenants',
+    # you must list the app where your tenant model resides in
+    'myapp',
 
-INSTALLED_APPS = [
+
+    'django.contrib.contenttypes',
+
+    'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-]
+)
+
+
+TENANT_APPS = (
+    # The following Django contrib apps must be in TENANT_APP
+    'django.contrib.contenttypes',
+
+    # your tenant-specific apps
+)
+
+INSTALLED_APPS = list(SHARED_APPS) + \
+    [app for app in TENANT_APPS if app not in SHARED_APPS]
 
 MIDDLEWARE = [
+    'django_tenants.middleware.main.TenantMainMiddleware',  # 先頭
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -75,11 +93,18 @@ WSGI_APPLICATION = 'djtenants.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django_tenants.postgresql_backend',
+        'NAME': 'djtenant',
+        'USER': 'djtenant',
+        'PASSWORD': 'djtenant',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
+DATABASE_ROUTERS = (
+    'django_tenants.routers.TenantSyncRouter',
+)
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -103,9 +128,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ja-jp'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tokyo'
 
 USE_I18N = True
 
@@ -123,3 +148,9 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+TENANT_MODEL = "myapp.Tenant"
+TENANT_DOMAIN_MODEL = "myapp.Domain"
+
+AUTH_USER_MODEL = 'myapp.TenantUser'

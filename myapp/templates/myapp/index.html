@@ -1,0 +1,13 @@
+{% extends 'base/base.html' %}
+
+{% block title %}
+Home
+{% endblock title %}
+
+{% block content %}
+Home
+<ul>
+    <li><a href="{% url 'myapp:app1index' %}">App1</a></li>
+    <li><a href="{% url 'myapp:app2index' %}">App2</a></li>
+</ul>
+{% endblock content %}
